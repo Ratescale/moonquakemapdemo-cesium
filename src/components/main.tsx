@@ -7,8 +7,8 @@ import { Panel } from "./panel";
 import type { Filters, MoonquakeData } from "@/type";
 import { fetchArtificialImpactCSV, fetchDeepMoonquakeCSV, fetchShallowMoonquakeCSV } from "@/utils/fetchMoonquakeCSV";
 
-// CesiumJS must be client-side only (no SSR)
-const CesiumGlobe = dynamic(() => import("./cesiumGlobe").then((m) => ({ default: m.CesiumGlobe })), {
+// deck.gl must be client-side only (no SSR)
+const DeckGlobe = dynamic(() => import("./deckGlobe").then((m) => ({ default: m.DeckGlobe })), {
   ssr: false,
   loading: () => <Box w="100%" h="100%" bgColor="black" />,
 });
@@ -34,7 +34,7 @@ export const Main = () => {
   return (
     <Box w="100%" h="100vh" position="relative" overflow="hidden">
       <Header filters={filters} setFilters={setFilters} />
-      <Panel selectedMoonquake={selectedMoonquake} />
+      <Panel selectedMoonquake={selectedMoonquake} onClose={() => setSelectedMoonquake(null)} />
 
       <Button
         onClick={() => setIsMap(!isMap)}
@@ -49,7 +49,13 @@ export const Main = () => {
         {isMap ? "3D Globe" : "2D Map"}
       </Button>
 
-      <Box w="100%" h="100%" position="absolute" top={0} left={0} zIndex={isMap ? 0 : -1}>
+      <Box
+        w="100%" h="100%" position="absolute" top={0} left={0}
+        zIndex={0}
+        opacity={isMap ? 1 : 0}
+        pointerEvents={isMap ? "auto" : "none"}
+        transition="opacity 0.4s ease"
+      >
         <MapComponent
           setIsMap={setIsMap}
           moonquakeData={moonquakeData}
@@ -57,8 +63,14 @@ export const Main = () => {
           onSelectMoonquake={setSelectedMoonquake}
         />
       </Box>
-      <Box w="100%" h="100%" position="absolute" top={0} left={0} zIndex={isMap ? -1 : 0}>
-        <CesiumGlobe
+      <Box
+        w="100%" h="100%" position="absolute" top={0} left={0}
+        zIndex={0}
+        opacity={isMap ? 0 : 1}
+        pointerEvents={isMap ? "none" : "auto"}
+        transition="opacity 0.4s ease"
+      >
+        <DeckGlobe
           moonquakeData={moonquakeData}
           filters={filters}
           onSelectMoonquake={setSelectedMoonquake}

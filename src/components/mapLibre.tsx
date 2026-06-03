@@ -65,10 +65,13 @@ export const MapComponent = ({ setIsMap, moonquakeData, filters, onSelectMoonqua
 
     mapRef.current = map;
 
+    let switching = false;
     map.on("zoom", () => {
-      if (map.getZoom() <= 3) {
+      if (map.getZoom() <= 3 && !switching) {
+        switching = true;
         setIsMap(false);
         map.setZoom(3.5);
+        setTimeout(() => { switching = false; }, 800);
       }
     });
 
