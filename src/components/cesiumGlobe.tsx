@@ -1,6 +1,5 @@
 import * as Cesium from "cesium";
 import type { Viewer as CesiumViewer } from "cesium";
-import "cesium/Build/Cesium/Widgets/widgets.css";
 import { useEffect, useMemo, useRef } from "react";
 import { Viewer as ResiumViewer } from "resium";
 import type { CesiumComponentRef } from "resium";
