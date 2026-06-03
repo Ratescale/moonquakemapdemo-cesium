@@ -1,7 +1,7 @@
-import DeckGL from "@deck.gl/react";
 import { _GlobeView as GlobeView } from "@deck.gl/core";
 import { TileLayer } from "@deck.gl/geo-layers";
 import { BitmapLayer, ScatterplotLayer } from "@deck.gl/layers";
+import DeckGL from "@deck.gl/react";
 import { useMemo, useRef } from "react";
 import { isShallowMoonquake } from "@/type";
 import type { Filters, MoonquakeData } from "@/type";
