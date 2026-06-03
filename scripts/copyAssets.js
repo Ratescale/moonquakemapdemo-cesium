@@ -14,6 +14,12 @@ const copyDir = (src, dest) => {
 const cesiumBase = path.join(__dirname, "..", "node_modules", "cesium", "Build", "Cesium");
 const publicDest = path.join(__dirname, "..", "public", "cesium");
 
+if (!fs.existsSync(publicDest)) fs.mkdirSync(publicDest, { recursive: true });
+
+// Copy the main UMD bundle (this is what the <script> tag loads)
+fs.copyFileSync(path.join(cesiumBase, "Cesium.js"), path.join(publicDest, "Cesium.js"));
+console.log("Copied cesium/Cesium.js");
+
 for (const dir of ["Workers", "ThirdParty", "Assets", "Widgets"]) {
   copyDir(path.join(cesiumBase, dir), path.join(publicDest, dir));
   console.log(`Copied cesium/${dir}`);
