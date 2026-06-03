@@ -82,16 +82,16 @@ export const CesiumGlobe = ({ moonquakeData, filters, onSelectMoonquake, onZoomI
     });
 
     // Click → select moonquake
+    // Use picked.id?.id string check instead of instanceof (avoids UMD/ESM class mismatch)
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((click: { position: Cesium.Cartesian2 }) => {
       const picked = viewer.scene.pick(click.position);
-      if (Cesium.defined(picked) && picked.id instanceof Cesium.Entity) {
-        const id = picked.id.id as string;
-        if (id?.startsWith("quake-")) {
-          const idx = parseInt(id.slice(6), 10);
-          const quake = dataRef.current[idx];
-          if (quake) onSelectRef.current(quake);
-        }
+      if (!Cesium.defined(picked)) return;
+      const entityId = picked.id?.id as string | undefined;
+      if (entityId?.startsWith("quake-")) {
+        const idx = parseInt(entityId.slice(6), 10);
+        const quake = dataRef.current[idx];
+        if (quake) onSelectRef.current(quake);
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -99,8 +99,8 @@ export const CesiumGlobe = ({ moonquakeData, filters, onSelectMoonquake, onZoomI
     const moveHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     moveHandler.setInputAction((movement: { endPosition: Cesium.Cartesian2 }) => {
       const picked = viewer.scene.pick(movement.endPosition);
-      viewer.scene.canvas.style.cursor =
-        Cesium.defined(picked) && picked.id instanceof Cesium.Entity ? "pointer" : "default";
+      const entityId = picked?.id?.id as string | undefined;
+      viewer.scene.canvas.style.cursor = entityId?.startsWith("quake-") ? "pointer" : "default";
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
     return () => {
@@ -126,13 +126,14 @@ export const CesiumGlobe = ({ moonquakeData, filters, onSelectMoonquake, onZoomI
 
       viewer.entities.add({
         id: `quake-${idx}`,
-        position: Cesium.Cartesian3.fromDegrees(quake.location.longitude, quake.location.latitude, 0),
+        // Small height offset (5km) prevents clipping into the surface
+        position: Cesium.Cartesian3.fromDegrees(quake.location.longitude, quake.location.latitude, 5000),
         point: {
           pixelSize: getPixelSize(quake),
           color: getCesiumColor(quake),
           outlineColor: Cesium.Color.WHITE.withAlpha(0.4),
           outlineWidth: 1,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          // No disableDepthTestDistance — let the globe occlude back-side points naturally
         },
       });
     });
